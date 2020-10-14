@@ -603,7 +603,7 @@ namespace gehelvehammer.src.entities
             {
                 Random rand = Api.World.Rand;
 
-                var quarter = rand.Next(1, 5);
+                var quarter = rand.Next(1, 4);
 
                 if (quarter != 1)
                     delay = true;

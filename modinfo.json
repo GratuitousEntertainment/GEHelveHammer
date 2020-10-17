@@ -1,0 +1,11 @@
+{
+  "type": "code",
+  "modid": "gehelvehammer",
+  "name": "GE Helve Hammer",
+  "author": "DrAstralis",
+  "description": "Extends the vanilla helve hammer work recepies",
+  "version": "0.1.0",
+  "dependency": {
+    "game": "1.13.4"
+  }
+}

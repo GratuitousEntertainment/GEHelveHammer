@@ -3,8 +3,8 @@
   "modid": "gehelvehammer",
   "name": "GE Helve Hammer",
   "author": "DrAstralis",
-  "description": "Extends the vanilla helve hammer work recepies",
-  "version": "0.1.0",
+  "description": "Extends the vanilla helve hammer work recipes to include other 2D smithing recipes",
+  "version": "0.1.1",
   "dependency": {
     "game": "1.13.4"
   }

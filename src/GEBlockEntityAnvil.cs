@@ -1,17 +1,12 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
-using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
-using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
@@ -20,6 +15,15 @@ namespace gehelvehammer.src
     [HarmonyPatch(typeof(BlockEntityAnvil))]
     public class GEBlockEntityAnvil
     {
+        public static SimpleParticleProperties bigMetalSparks;
+        public static SimpleParticleProperties smallMetalSparks;
+        public static SimpleParticleProperties slagPieces;
+
+        public static float voxYOff = 10 / 16f;
+
+        static int bitsPerByte = 2;
+        static int partsPerByte = 8 / bitsPerByte;
+
         static GEBlockEntityAnvil()
         {
             smallMetalSparks = new SimpleParticleProperties(
@@ -88,13 +92,44 @@ namespace gehelvehammer.src
 
             SmithingRecipe recipe = __instance.SelectedRecipe;
 
+            var isPlate = recipe.Output.Code.Path.Contains("plate");
+            var isGEExtended = (recipe.Output.Code.Path.Contains("arrow")
+                || recipe.Output.Code.Path.Contains("sawblade")
+                || recipe.Output.Code.Path.Contains("metalchain")
+                || recipe.Output.Code.Path.Contains("axehead")
+                || recipe.Output.Code.Path.Contains("chisel")
+                || recipe.Output.Code.Path.Contains("cleaver")
+                || recipe.Output.Code.Path.Contains("swordblade")
+                || recipe.Output.Code.Path.Contains("spearhead")
+                || recipe.Output.Code.Path.Contains("shovelhead")
+                || recipe.Output.Code.Path.Contains("shears")
+                || recipe.Output.Code.Path.Contains("scythehead")
+                || recipe.Output.Code.Path.Contains("metalscale")
+                || recipe.Output.Code.Path.Contains("prospectingpickhead")
+                || recipe.Output.Code.Path.Contains("pickaxehead")
+                || recipe.Output.Code.Path.Contains("hoehead")
+                || recipe.Output.Code.Path.Contains("knifeblade"));
+            bool delay = false;
             // Helve hammer can only work plates and iron bloom
-            if (!recipe.Output.Code.Path.Contains("plate") && !recipe.Output.Code.Path.Contains("arrow") && !__instance.IsIronBloom) return false;
+            if (!isPlate &&
+                !isGEExtended &&
+                !__instance.IsIronBloom) return false;
+
+            //Until I can fix the actual smithing code to make a more fair rep this will be the penalty for non plate smithing.
+            if (isGEExtended)
+            {
+                Random rand = __instance.Api.World.Rand;
+
+                var quarter = rand.Next(1, 4);
+
+                if (quarter != 1)
+                    delay = true;
+            }
 
             __instance.rotation = 0;
             int ymax = recipe.QuantityLayers;
             Vec3i usableMetalVoxel;
-            if (!__instance.IsIronBloom)
+            if (isPlate || (isGEExtended && !delay))
             {
                 usableMetalVoxel = findFreeMetalVoxel(ref __instance);
 
@@ -139,7 +174,7 @@ namespace gehelvehammer.src
                     __instance.CheckIfFinished(null);
                 }
             }
-            else
+            else if(__instance.IsIronBloom)
             {
 
                 for (int y = 5; y >= 0; y--)
@@ -176,20 +211,16 @@ namespace gehelvehammer.src
                         }
                     }
                 }
+            }else if (isGEExtended && delay)
+            {
+                //do sparks here
+                spawnParticles(new Vec3i(6, 1, 6), EnumVoxelMaterial.Metal , null, ref __instance);
+                spawnParticles(new Vec3i(7, 1, 7), EnumVoxelMaterial.Slag, null, ref __instance);
             }
 
             return false;
         }
-
-        public static SimpleParticleProperties bigMetalSparks;
-        public static SimpleParticleProperties smallMetalSparks;
-        public static SimpleParticleProperties slagPieces;
-
-        public static float voxYOff = 10 / 16f;
-
-        static int bitsPerByte = 2;
-        static int partsPerByte = 8 / bitsPerByte;
-
+                
         public static Vec3i findFreeMetalVoxel(ref BlockEntityAnvil __instance)
         {
             SmithingRecipe recipe = __instance.SelectedRecipe;

@@ -6,7 +6,6 @@ namespace gehelvehammer.src
 {
     class GECore : ModSystem
     {
-
         public override void Start(ICoreAPI api)
         {
             api.World.Logger.Debug("Installing GE Helvehammer");

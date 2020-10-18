@@ -503,12 +503,12 @@ namespace gehelvehammer.src
 
             BlockPos Pos = __instance.Pos;
 
-            var jjjjjjj = new CallBack(ref __instance,capi,recipes,Pos);
+            var callBack = new CallBack(ref __instance,capi,recipes,Pos);
 
             GuiDialog dlg = new GuiDialogBlockEntityRecipeSelector(
                 Lang.Get("Select smithing recipe"),
                 stacks.ToArray(),
-                jjjjjjj.OnSelect,
+                callBack.OnSelect,
                 () => {
                     capi.Network.SendBlockEntityPacket(Pos.X, Pos.Y, Pos.Z, (int)EnumClayFormingPacket.CancelSelect);
                 },
